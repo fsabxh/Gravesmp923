@@ -1,0 +1,40 @@
+
+name: Build GraveSMP
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download repository files
+        uses: actions/checkout@v4
+
+      - name: Install Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+          cache-dependency-path: GraveSMPPlugin/pom.xml
+
+      - name: Extract plugin ZIP
+        run: unzip -o GraveSMPPlugin_v1.9_strength_kits_trims.zip
+
+      - name: Compile plugin
+        run: mvn -B -f GraveSMPPlugin/pom.xml clean package
+
+      - name: Save the JAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: GraveSMP-JAR
+          path: GraveSMPPlugin/target/*.jar
+          if-no-files-found: error
